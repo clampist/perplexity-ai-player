@@ -46,3 +46,41 @@ jobs:
           path: artifacts/
           retention-days: 7
 
+    outputs:
+      report-dir: playwright-report
+
+  publish-report:
+    needs: test
+    if: always()  # publish even if tests fail
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # gh-pages need full history
+
+      - name: Download HTML report artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report
+
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: playwright-report
+          keep_files: false  # overwrite old reports
+
+      - name: Comment report URL
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = `https://${context.repo.owner}.github.io/${context.repo.repo}/index.html`;
+            github.rest.issues.createComment({
+              ...context.repo,
+              issue_number: context.issue.number,
+              body: `Playwright report is published: ${url}`
+            });
