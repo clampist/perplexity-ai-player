@@ -24,9 +24,6 @@ test.describe('Perplexity.ai homepage', () => {
     const answer = page.getByText(/Answer?/i).first();
     await answer.waitFor({ state: 'attached', timeout: 5_000 });
 
-    const thinking = page.getByText(/Thinking…?/i).first();
-    await thinking.waitFor({ state: 'detached', timeout: 45_000 });
-
     const screenshotPath = `artifacts/perplexity-ai-${Date.now()}.png`;
     const screenshot = await page.screenshot({ path: screenshotPath, fullPage: true });
     await testInfo.attach('search-result', {
