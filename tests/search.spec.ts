@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Perplexity.ai homepage', () => {
-  test('loads homepage and returns results for a basic search', async ({ page }) => {
+  test('loads homepage and returns results for a basic search', async ({ page }, testInfo) => {
     await page.goto('/');
 
     await expect(page).toHaveURL('https://www.perplexity.ai/');
@@ -20,6 +20,12 @@ test.describe('Perplexity.ai homepage', () => {
 
     await page.waitForURL((url) => url.href.includes('/search/'), { timeout: 30_000 });
     await expect(page.locator('main')).toContainText(/Playwright/i);
+
+    const screenshot = await page.screenshot({ fullPage: true });
+    await testInfo.attach('search-result', {
+      body: screenshot,
+      contentType: 'image/png'
+    });
   });
 });
 
