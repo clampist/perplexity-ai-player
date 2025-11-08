@@ -21,7 +21,14 @@ test.describe('Perplexity.ai homepage', () => {
     await page.waitForURL((url) => url.href.includes('/search/'), { timeout: 30_000 });
     await expect(page.locator('main')).toContainText(/Playwright/i);
 
-    const screenshot = await page.screenshot({ fullPage: true });
+    const answer = page.getByText(/Answer?/i).first();
+    await answer.waitFor({ state: 'attached', timeout: 5_000 });
+
+    const thinking = page.getByText(/Thinking…?/i).first();
+    await thinking.waitFor({ state: 'detached', timeout: 45_000 });
+
+    const screenshotPath = `artifacts/perplexity-ai-${Date.now()}.png`;
+    const screenshot = await page.screenshot({ path: screenshotPath, fullPage: true });
     await testInfo.attach('search-result', {
       body: screenshot,
       contentType: 'image/png'
